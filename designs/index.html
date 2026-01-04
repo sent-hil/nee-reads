@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Discover Books</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3B82F6", // Blue-500 equivalent for primary actions/links
+              "background-light": "#F3F4F6", // Gray-100
+              "background-dark": "#111827", // Gray-900
+              "card-light": "#FFFFFF",
+              "card-dark": "#1F2937", // Gray-800
+              "text-main-light": "#111827",
+              "text-main-dark": "#F9FAFB",
+              "text-sub-light": "#6B7280", // Gray-500
+              "text-sub-dark": "#9CA3AF", // Gray-400
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              body: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'xl': '1rem',
+              '2xl': '1.5rem',
+            },
+            boxShadow: {
+              'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+              'floating': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            }
+          },
+        },
+      };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+body { font-family: 'Inter', sans-serif; }.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}.no-scrollbar {
+  -ms-overflow-style: none;scrollbar-width: none;}
+        .book-card-hover:hover {
+          transform: translateY(-4px);
+        }
+    </style>
+  </head>
+  <body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col transition-colors duration-300">
+    <div class="w-full max-w-7xl mx-auto px-6 pt-8 pb-4">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-1">Discover</h1>
+          <p class="text-text-sub-light dark:text-text-sub-dark text-lg font-normal">Find your next read</p>
+        </div>
+        <button class="p-3 rounded-full bg-white dark:bg-card-dark shadow-sm hover:shadow-md transition-shadow text-gray-600 dark:text-gray-300">
+          <span class="material-icons-round text-2xl">filter_list</span>
+        </button>
+      </div>
+      <div class="relative w-full mb-8 group">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <span class="material-icons-round text-primary text-2xl group-focus-within:text-blue-600 transition-colors">search</span>
+        </div>
+        <input class="block w-full pl-12 pr-12 py-4 bg-white dark:bg-card-dark border-none rounded-2xl text-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary shadow-soft dark:shadow-none transition-all" placeholder="Dune" type="text" value="Dune"/>
+        <div class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer">
+          <span class="material-icons-round text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">cancel</span>
+        </div>
+      </div>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-sm font-semibold tracking-wider text-text-sub-light dark:text-text-sub-dark uppercase">Top Results</h2>
+        <span class="bg-blue-100 dark:bg-blue-900/30 text-primary px-3 py-1 rounded-full text-xs font-semibold">12 Books</span>
+      </div>
+    </div>
+    <main class="flex-grow w-full max-w-7xl mx-auto px-6 pb-12">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-white dark:bg-card-dark rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer relative">
+            <img alt="Book cover with beige abstract design" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFMDXVceB1UuL4eBNu887ZqlN_dqMnaBSWwQUfJqoXwr1YbjHe2ChO4dumQaFNU25NWBLOjBzzh0IxKOinZJkMSyG2k5V_9D3APTyVRAIzlsupzXI6-RDDgXlNQ55GSTszH6EZ4kMDZzrEnUHxENyVkzyd6OiC59MAWiz1asxU5aZBvuQy8-w8Pnu321Tnox4bdxwmwM81ScDx--fdoGcOnLBoGsc2RPyKYpD4-zN9ytlhjFXOLt3Ljsd7gHjFwFUtP9oAw1sfVEk"/>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">Book Ipsum</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Jane Doe</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-slate-800 rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer">
+            <img alt="Dark green minimalist book cover" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJtX2EVKSrmTWVvOAWgfIsi_P6cPERwZTgGsARfmV7emdE_80o-vZAVfR0U43dPasGKs2MdDtQXQeL3xtaa5yyEWW6eNMhbbjjMFiDK2GHJJQm6sAV_Yp0eShc1jCDBjlqADSN8YTsoUCCG9WZkLIM61U9s20KxTkWcT6WIamt1oMfF5VXqPnIZAm08U4JskT88qmTDO4-0p2FDApsTUzpjmJLhU1KUKszwf68JqvdRtDCS_fzdhVSqERfO9wl4s8_xbvlVgRMW0k"/>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">The Void</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Alex Smith</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center text-center p-4 transition-transform duration-300 book-card-hover cursor-pointer">
+            <span class="material-icons-round text-4xl text-gray-400 dark:text-gray-500 mb-2">menu_book</span>
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Cover<br/>Unavailable</span>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">Lost Archives</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Unknown Author</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-emerald-100 rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer">
+            <img alt="Green book with white graphics" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-s9F8yHaMYz20T1ymiKx5dAeF_ldxdbhlTmYEKljuYhE006Jdz8tFTDYdRLbUekUEgtsHkjo8c-FeCur8JArmWBtbxLedpsUyeLX_PFYDgv95mf-IOIl6MBVMfvdzPOu_QHnzPpyUhSElVJQv8eK_ap6l9As1WyQmQvLlGdf6eEspMQL7Rh7vMv8aEPgu72_s1t9j0B3LmUjKJtzVV7fzWH_wUQUyyi2aMg1VDDwsEqc4F0j7GA-SbhR_Y4MkBGNBjGTvGdKjKCY"/>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">Nature's Code</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Emily Green</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-blue-900 rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer">
+            <img alt="Abstract blue swirl pattern" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbQLkAwRrqxdwV3eZQ3CNMiYQzQl0Zn0gfCRNnLVyvduRBnhuw8BiYh_7LPUGH8pBCmrqNYqYW-rv4e-N39768Lno1RqwLqCocDriTWXRpDdInETFCEq64SpO3WI3n_a32_xnj65VnSlXQ2yZaP5NEPfHg98j3OFIUihJHOu8Aact3qH67gQNlmH8Ii396Rr3ArZ5mlSCzEtF_Aof-Px6FWqrdYrNXrMUk6Mp66R-JwApaMNc53trkV-gGSiXBEGIp_vkNiLUaTAY"/>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">Ocean Depth</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Marina Blue</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-orange-50 rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer">
+            <img alt="Stack of books on pastel background" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-cNV6J9-67sGv-TrxSfxSLJ1VO-SM68qFE1h2f_ikgfEJ44IhWmS5Sgo8YrzGcelhGfevW56cFtQojyykmuwc_nLnCC6drbQ1UYPdINXtmHcifxmNevVtS3Mz33hUyzAefkG5ezbJ9zVjpW8bBRcv8fBM-CsWclvpP-FndYr8bxviIdq6o5OfpqHgZc_noeAUxiVJkO-qaPQWuRJB0cCTfT3vuraxJTmmCkXOw8wfob4DHW2BF8HNRIsQ5UVBZ8pRtAV-E9SOPD0"/>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">The Scholar</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Prof. Wisdom</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-gray-100 rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer">
+            <img alt="Simple white book on surface" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCV6SRwV8tmM0KyUxA5AN2tjm0obzARfXpBtye7Ay4qo8w47Eypjae05EtxDaqUhv3-CoGSsqf0wlnf2i10arplEScq03Qn73PmW1YDKcDatoaHsOy0kAjoz422E-FE3pRBizJPOm7ngSjnjHUko-VxUpOHVlxI6xcaQod_qHknn8YLHEXtAGTWRbJeDGxmvuKZqFT9qm_Vy57VPQRp3FFeLStr5Lo05OCQ9JpJ5uXlTUOJ8zMUfc7GlXQ7SlcOT5jkTRCHo5p2MM"/>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">Blank Canvas</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Arturo Bianco</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-amber-800 rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer">
+            <img alt="Brown leather texture closeup" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBObXSs7W2DbXEww0F_uqxTm1vO2DesU3M_CHWsP6kZlOuHRcGDthmRMLltxm0zaJv58LnM-NVPEbo3c7T-D8sQcSfArHTXjWyX2Z-y2uMLW3eP0vCCKzkWeX7ma-ltnur4EfLpg_fg8wMjjshFoXrgK3uoo2dFVkbcpXbdRBfX5wJUHvF5k-ueyOAMhxpANBNEEQ6_1ljMwoQROYUMRDZ3b38FU1O3F-hdsu_NmabJp1gZ3IYV9NG-oPGwoPHKdFXLAM-NmzGKAX0"/>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">Classic Tales</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">Herman Melville</p>
+          </div>
+        </div>
+        <div class="group relative flex flex-col">
+          <div class="aspect-[2/3] w-full bg-blue-50 dark:bg-blue-900/20 rounded-xl flex flex-col items-center justify-center text-center p-4 transition-transform duration-300 book-card-hover cursor-pointer">
+            <div class="bg-blue-100 dark:bg-blue-800 rounded-full p-3 mb-2">
+              <span class="material-icons-round text-primary dark:text-blue-300 text-2xl">auto_stories</span>
+            </div>
+            <span class="text-xs font-bold text-primary dark:text-blue-300 uppercase tracking-wide">Unknown</span>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white leading-tight truncate">Mystery novel</h3>
+            <p class="text-sm text-text-sub-light dark:text-text-sub-dark truncate">John Doe</p>
+          </div>
+        </div>
+        <div class="hidden lg:block aspect-[2/3] w-full bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"></div>
+        <div class="hidden xl:block aspect-[2/3] w-full bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"></div>
+      </div>
+      <div class="mt-12 text-center">
+        <p class="text-text-sub-light dark:text-text-sub-dark text-sm">End of results</p>
+      </div>
+    </main>
+    <footer class="w-full bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-800 mt-auto py-2">
+      <div class="max-w-md mx-auto flex justify-around items-center h-16">
+        <button class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary dark:hover:text-blue-400 transition-colors group">
+          <span class="material-icons-round text-2xl mb-1 group-hover:scale-110 transition-transform">library_books</span>
+          <span class="text-[10px] font-medium tracking-wide">Library</span>
+        </button>
+        <button class="flex flex-col items-center justify-center w-full h-full text-primary relative group">
+          <span class="material-icons-round text-3xl mb-1 group-hover:scale-110 transition-transform">search</span>
+          <span class="text-[10px] font-bold tracking-wide">Discover</span>
+          <span class="absolute -top-[1px] w-8 h-1 bg-primary rounded-b-lg"></span>
+        </button>
+        <button class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary dark:hover:text-blue-400 transition-colors group">
+          <span class="material-icons-round text-2xl mb-1 group-hover:scale-110 transition-transform">settings</span>
+          <span class="text-[10px] font-medium tracking-wide">Settings</span>
+        </button>
+      </div>
+    </footer>
+  </body></html>

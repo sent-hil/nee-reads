@@ -1,0 +1,17 @@
+[defaults]
+shell = "/usr/bin/fish"
+
+[git]
+name = "Opencode"
+email = "me+opencode@sent-hil.com"
+
+[shell]
+init = [
+    "command -v direnv >/dev/null && direnv allow && eval \"$(direnv export bash)\" || true"
+]
+
+[files]
+mounts = [
+    ".envrc:/workspaces/nee-reads/.envrc",
+    "opencode.json:/workspaces/nee-reads/opencode.json"
+]
