@@ -3,8 +3,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import type { Book, ReadingStatus } from './types/book';
-import { searchBooks, ApiError } from './services/api';
+import type { Book } from './types/book';
+import { searchBooks, ApiError, setBookStatus, deleteBookStatus } from './services/api';
 import { useDebounce } from './hooks/useDebounce';
 import { SearchBar } from './components/SearchBar';
 import { BookGrid } from './components/BookGrid';
@@ -12,6 +12,8 @@ import { Pagination } from './components/Pagination';
 import { EmptyState } from './components/EmptyState';
 import { NoResults } from './components/NoResults';
 import { LoadingState } from './components/LoadingState';
+import { Toast, ToastData } from './components/Toast';
+import { StatusChangeInfo } from './components/BookCard';
 
 const DEBOUNCE_DELAY = 500;
 
@@ -38,6 +40,7 @@ const initialState: SearchState = {
 export function App() {
   const [query, setQuery] = useState('');
   const [state, setState] = useState<SearchState>(initialState);
+  const [toast, setToast] = useState<ToastData | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const debouncedQuery = useDebounce(query.trim(), DEBOUNCE_DELAY);
@@ -114,16 +117,56 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleStatusChange = (openlibraryWorkKey: string, status: ReadingStatus) => {
+  const handleStatusChange = (info: StatusChangeInfo) => {
     // Update the book's status in local state to keep UI in sync
     setState((prev) => ({
       ...prev,
       books: prev.books.map((book) =>
-        book.openlibrary_work_key === openlibraryWorkKey
-          ? { ...book, status }
+        book.openlibrary_work_key === info.openlibraryWorkKey
+          ? { ...book, status: info.newStatus }
           : book
       ),
     }));
+
+    // Show toast notification
+    setToast({
+      id: `${info.openlibraryWorkKey}-${Date.now()}`,
+      bookTitle: info.bookTitle,
+      status: info.newStatus,
+      openlibraryWorkKey: info.openlibraryWorkKey,
+      previousStatus: info.previousStatus,
+    });
+  };
+
+  const handleToastDismiss = () => {
+    setToast(null);
+  };
+
+  const handleUndo = async (toastData: ToastData) => {
+    // Dismiss toast immediately
+    setToast(null);
+
+    try {
+      if (toastData.previousStatus === null) {
+        // If there was no previous status, delete the status
+        await deleteBookStatus(toastData.openlibraryWorkKey);
+      } else {
+        // Otherwise, restore the previous status
+        await setBookStatus(toastData.openlibraryWorkKey, toastData.previousStatus);
+      }
+
+      // Update local state
+      setState((prev) => ({
+        ...prev,
+        books: prev.books.map((book) =>
+          book.openlibrary_work_key === toastData.openlibraryWorkKey
+            ? { ...book, status: toastData.previousStatus }
+            : book
+        ),
+      }));
+    } catch (error) {
+      console.error('Failed to undo status change:', error);
+    }
   };
 
   const renderContent = () => {
@@ -227,6 +270,11 @@ export function App() {
       <main className="flex-grow w-full max-w-7xl mx-auto px-6 pb-12">
         {renderContent()}
       </main>
+
+      {/* Toast notification */}
+      {toast && (
+        <Toast toast={toast} onUndo={handleUndo} onDismiss={handleToastDismiss} />
+      )}
 
       {/* Footer */}
       <footer className="w-full bg-white border-t border-gray-200 mt-auto py-2">

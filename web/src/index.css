@@ -18,3 +18,19 @@ body {
 .book-card-hover:hover {
   transform: translateY(-4px);
 }
+
+/* Toast animation */
+@keyframes slide-up-fade {
+  0% {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.toast-animate {
+  animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

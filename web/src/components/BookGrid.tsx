@@ -2,12 +2,12 @@
  * BookGrid component displaying a responsive grid of book cards
  */
 
-import type { Book, ReadingStatus } from '../types/book';
-import { BookCard } from './BookCard';
+import type { Book } from '../types/book';
+import { BookCard, StatusChangeInfo } from './BookCard';
 
 interface BookGridProps {
   books: Book[];
-  onStatusChange?: (openlibraryWorkKey: string, status: ReadingStatus) => void;
+  onStatusChange?: (info: StatusChangeInfo) => void;
 }
 
 export function BookGrid({ books, onStatusChange }: BookGridProps) {

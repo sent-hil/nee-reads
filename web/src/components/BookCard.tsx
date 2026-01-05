@@ -2,13 +2,20 @@
  * BookCard component displaying a single book with cover, title, and author
  */
 
-import { useState } from 'preact/hooks';
+import { useState, useRef } from 'preact/hooks';
 import type { Book, ReadingStatus } from '../types/book';
 import { setBookStatus } from '../services/api';
 
+export interface StatusChangeInfo {
+  openlibraryWorkKey: string;
+  bookTitle: string;
+  newStatus: ReadingStatus;
+  previousStatus: ReadingStatus | null;
+}
+
 interface BookCardProps {
   book: Book;
-  onStatusChange?: (openlibraryWorkKey: string, status: ReadingStatus) => void;
+  onStatusChange?: (info: StatusChangeInfo) => void;
 }
 
 const STATUS_LABELS: Record<ReadingStatus, string> = {
@@ -21,6 +28,7 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   // Initialize from book.status (from API) - this reflects database state
   const [localStatus, setLocalStatus] = useState<ReadingStatus | null>(book.status);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const authorDisplay =
     book.author_name.length > 0 ? book.author_name.join(', ') : 'Unknown Author';
@@ -28,11 +36,21 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
   const handleStatusClick = async (status: ReadingStatus) => {
     if (isUpdating) return;
 
+    const previousStatus = localStatus;
+
+    // Close dropdown immediately by blurring the button
+    menuButtonRef.current?.blur();
+
     setIsUpdating(true);
     try {
       await setBookStatus(book.openlibrary_work_key, status);
       setLocalStatus(status);
-      onStatusChange?.(book.openlibrary_work_key, status);
+      onStatusChange?.({
+        openlibraryWorkKey: book.openlibrary_work_key,
+        bookTitle: book.title,
+        newStatus: status,
+        previousStatus,
+      });
     } catch (error) {
       console.error('Failed to update book status:', error);
     } finally {
@@ -95,6 +113,7 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
       <div className="absolute top-2 right-2 z-10">
         <div className="relative">
           <button
+            ref={menuButtonRef}
             className={`flex items-center justify-center w-8 h-8 rounded-full shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 focus:outline-none peer ${
               book.cover_url
                 ? 'bg-black/40 hover:bg-black/60 backdrop-blur-md text-white'
