@@ -43,12 +43,14 @@ uv run uvicorn api.main:app --reload --port 7002
 
 ### Running Python Tests
 ```bash
-uv run pytest
+uv sync --extra dev && uv run pytest
 ```
 
 ### Running Frontend Tests
+**Note:** Frontend tests are currently broken due to ESM/Jest configuration issues with Preact. The test infrastructure exists but needs fixing before it can be used.
+
 ```bash
-cd web && npm test
+cd web && npm install && npm test
 ```
 
 ### Installing Dependencies

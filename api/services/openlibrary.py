@@ -41,7 +41,7 @@ def build_cover_url(doc: dict[str, Any]) -> Optional[str]:
 def parse_book_from_doc(doc: dict[str, Any]) -> Book:
     """Parse an OpenLibrary document into a Book model."""
     return Book(
-        key=doc.get("key", ""),
+        openlibrary_work_key=doc.get("key", ""),
         title=doc.get("title", "Unknown Title"),
         author_name=doc.get("author_name", []),
         cover_url=build_cover_url(doc),

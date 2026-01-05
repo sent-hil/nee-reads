@@ -194,7 +194,7 @@ class TestSearchEndpoint:
 
             assert response.status_code == 200
             book = response.json()["books"][0]
-            assert "key" in book
+            assert "openlibrary_work_key" in book
             assert "title" in book
             assert "author_name" in book
             assert "cover_url" in book

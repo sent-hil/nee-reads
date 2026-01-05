@@ -16,7 +16,7 @@ export function BookCard({ book }: BookCardProps) {
     <div
       className="group relative flex flex-col"
       data-testid="book-card"
-      data-book-key={book.key}
+      data-book-key={book.openlibrary_work_key}
     >
       <div className="aspect-[2/3] w-full bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer relative z-0">
         {book.cover_url ? (

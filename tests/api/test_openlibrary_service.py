@@ -64,7 +64,7 @@ class TestParseBookFromDoc:
         }
         book = parse_book_from_doc(doc)
 
-        assert book.key == "/works/OL12345W"
+        assert book.openlibrary_work_key == "/works/OL12345W"
         assert book.title == "Test Book"
         assert book.author_name == ["Author One", "Author Two"]
         assert book.cover_url == f"{OPENLIBRARY_COVER_URL}/id/98765-L.jpg"
@@ -75,7 +75,7 @@ class TestParseBookFromDoc:
         doc = {"key": "/works/OL12345W", "title": "Minimal Book"}
         book = parse_book_from_doc(doc)
 
-        assert book.key == "/works/OL12345W"
+        assert book.openlibrary_work_key == "/works/OL12345W"
         assert book.title == "Minimal Book"
         assert book.author_name == []
         assert book.cover_url is None
@@ -86,7 +86,7 @@ class TestParseBookFromDoc:
         doc = {}
         book = parse_book_from_doc(doc)
 
-        assert book.key == ""
+        assert book.openlibrary_work_key == ""
         assert book.title == "Unknown Title"
         assert book.author_name == []
         assert book.cover_url is None
@@ -221,7 +221,7 @@ class TestParseSearchResponse:
         result = parse_search_response(sample_openlibrary_response, page=1, limit=100)
 
         book = result.books[0]
-        assert book.key == "/works/OL27448W"
+        assert book.openlibrary_work_key == "/works/OL27448W"
         assert book.title == "The Lord of the Rings"
         assert book.author_name == ["J. R. R. Tolkien"]
         assert book.first_publish_year == 1954

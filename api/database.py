@@ -2,9 +2,10 @@
 
 import aiosqlite
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+from datetime import datetime
 
 # Default database path - can be overridden for testing
 DATABASE_PATH = Path("data/database.db")
@@ -42,6 +43,22 @@ async def init_database(db_path: Optional[Path] = None) -> None:
         )
         await db.execute("CREATE INDEX IF NOT EXISTS idx_query_hash ON search_cache(query_hash)")
         await db.execute("CREATE INDEX IF NOT EXISTS idx_expires_at ON search_cache(expires_at)")
+
+        # Book reading status table
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS book_status (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                openlibrary_work_key TEXT UNIQUE NOT NULL,
+                status TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+        )
+        await db.execute(
+            "CREATE INDEX IF NOT EXISTS idx_openlibrary_work_key ON book_status(openlibrary_work_key)"
+        )
         await db.commit()
 
 
@@ -51,3 +68,107 @@ async def clear_expired_cache(db_path: Optional[Path] = None) -> int:
         cursor = await db.execute("DELETE FROM search_cache WHERE expires_at < datetime('now')")
         await db.commit()
         return cursor.rowcount
+
+
+# Book status operations
+
+
+async def get_book_status(
+    openlibrary_work_key: str, db_path: Optional[Path] = None
+) -> Optional[dict[str, Any]]:
+    """Get the reading status for a book.
+
+    Args:
+        openlibrary_work_key: The OpenLibrary work key (e.g., 'OL123W')
+        db_path: Optional database path for testing
+
+    Returns:
+        Dictionary with status data or None if not found
+    """
+    async with get_db_connection(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute(
+            "SELECT * FROM book_status WHERE openlibrary_work_key = ?",
+            (openlibrary_work_key,),
+        )
+        row = await cursor.fetchone()
+        if row:
+            return dict(row)
+        return None
+
+
+async def set_book_status(
+    openlibrary_work_key: str, status: str, db_path: Optional[Path] = None
+) -> dict[str, Any]:
+    """Set or update the reading status for a book.
+
+    Args:
+        openlibrary_work_key: The OpenLibrary work key (e.g., 'OL123W')
+        status: The reading status ('to_read', 'did_not_finish', 'completed')
+        db_path: Optional database path for testing
+
+    Returns:
+        Dictionary with the updated status data
+    """
+    now = datetime.utcnow().isoformat()
+    async with get_db_connection(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        await db.execute(
+            """
+            INSERT INTO book_status (openlibrary_work_key, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(openlibrary_work_key) DO UPDATE SET
+                status = excluded.status,
+                updated_at = excluded.updated_at
+            """,
+            (openlibrary_work_key, status, now, now),
+        )
+        await db.commit()
+
+        cursor = await db.execute(
+            "SELECT * FROM book_status WHERE openlibrary_work_key = ?",
+            (openlibrary_work_key,),
+        )
+        row = await cursor.fetchone()
+        return dict(row)
+
+
+async def delete_book_status(
+    openlibrary_work_key: str, db_path: Optional[Path] = None
+) -> bool:
+    """Delete the reading status for a book.
+
+    Args:
+        openlibrary_work_key: The OpenLibrary work key (e.g., 'OL123W')
+        db_path: Optional database path for testing
+
+    Returns:
+        True if a row was deleted, False if no row existed
+    """
+    async with get_db_connection(db_path) as db:
+        cursor = await db.execute(
+            "DELETE FROM book_status WHERE openlibrary_work_key = ?",
+            (openlibrary_work_key,),
+        )
+        await db.commit()
+        return cursor.rowcount > 0
+
+
+async def get_all_book_statuses(
+    db_path: Optional[Path] = None,
+) -> list[dict[str, Any]]:
+    """Get all book statuses.
+
+    Args:
+        db_path: Optional database path for testing
+
+    Returns:
+        List of dictionaries with status data
+    """
+    async with get_db_connection(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute(
+            "SELECT * FROM book_status ORDER BY updated_at DESC"
+        )
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]

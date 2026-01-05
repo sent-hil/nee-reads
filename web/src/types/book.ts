@@ -3,7 +3,7 @@
  */
 
 export interface Book {
-  key: string;
+  openlibrary_work_key: string;
   title: string;
   author_name: string[];
   cover_url: string | null;

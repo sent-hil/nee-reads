@@ -20,7 +20,7 @@ export function BookGrid({ books }: BookGridProps) {
       data-testid="book-grid"
     >
       {books.map((book) => (
-        <BookCard key={book.key} book={book} />
+        <BookCard key={book.openlibrary_work_key} book={book} />
       ))}
     </div>
   );

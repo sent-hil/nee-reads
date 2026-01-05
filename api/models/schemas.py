@@ -8,7 +8,9 @@ from pydantic import BaseModel, Field
 class Book(BaseModel):
     """Book model representing a book from search results."""
 
-    key: str = Field(..., description="Open Library work key")
+    openlibrary_work_key: str = Field(
+        ..., description="OpenLibrary work key (e.g., '/works/OL123W')"
+    )
     title: str = Field(..., description="Book title")
     author_name: list[str] = Field(default_factory=list, description="List of author names")
     cover_url: Optional[str] = Field(None, description="URL to the book cover image")
