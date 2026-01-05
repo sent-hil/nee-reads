@@ -2,6 +2,8 @@
 
 A simple goodreads clone for NeeNee.
 
+![Home Page](screenshots/index.jpg)
+
 ## Prerequisites
 
 - Python 3.11+
