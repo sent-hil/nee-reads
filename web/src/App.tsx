@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import type { Book } from './types/book';
+import type { Book, ReadingStatus } from './types/book';
 import { searchBooks, ApiError } from './services/api';
 import { useDebounce } from './hooks/useDebounce';
 import { SearchBar } from './components/SearchBar';
@@ -114,6 +114,18 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleStatusChange = (openlibraryWorkKey: string, status: ReadingStatus) => {
+    // Update the book's status in local state to keep UI in sync
+    setState((prev) => ({
+      ...prev,
+      books: prev.books.map((book) =>
+        book.openlibrary_work_key === openlibraryWorkKey
+          ? { ...book, status }
+          : book
+      ),
+    }));
+  };
+
   const renderContent = () => {
     if (state.isLoading) {
       return <LoadingState />;
@@ -155,7 +167,7 @@ export function App() {
 
     return (
       <>
-        <BookGrid books={state.books} />
+        <BookGrid books={state.books} onStatusChange={handleStatusChange} />
         <Pagination
           currentPage={state.page}
           totalPages={state.totalPages}

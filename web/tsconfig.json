@@ -22,5 +22,6 @@
     },
     "baseUrl": "."
   },
-  "include": ["src", "../tests/web"]
+  "include": ["src"],
+  "exclude": ["../tests"]
 }

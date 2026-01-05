@@ -20,9 +20,13 @@ class TestSearchEndpoint:
                 "api.routes.books.store_cached_response", new_callable=AsyncMock
             ) as mock_cache_store,
             patch("api.routes.books.search_books", new_callable=AsyncMock) as mock_search,
+            patch(
+                "api.routes.books.get_book_statuses_batch", new_callable=AsyncMock
+            ) as mock_statuses,
         ):
             mock_cache_get.return_value = None
             mock_search.return_value = sample_openlibrary_response
+            mock_statuses.return_value = {}
 
             response = await client.get("/api/books/search", params={"q": "tolkien"})
 
@@ -39,8 +43,12 @@ class TestSearchEndpoint:
         with (
             patch("api.routes.books.get_cached_response", new_callable=AsyncMock) as mock_cache_get,
             patch("api.routes.books.search_books", new_callable=AsyncMock) as mock_search,
+            patch(
+                "api.routes.books.get_book_statuses_batch", new_callable=AsyncMock
+            ) as mock_statuses,
         ):
             mock_cache_get.return_value = sample_openlibrary_response
+            mock_statuses.return_value = {}
 
             response = await client.get("/api/books/search", params={"q": "cached"})
 
@@ -57,9 +65,13 @@ class TestSearchEndpoint:
                 "api.routes.books.store_cached_response", new_callable=AsyncMock
             ) as mock_cache_store,
             patch("api.routes.books.search_books", new_callable=AsyncMock) as mock_search,
+            patch(
+                "api.routes.books.get_book_statuses_batch", new_callable=AsyncMock
+            ) as mock_statuses,
         ):
             mock_cache_get.return_value = None
             mock_search.return_value = sample_openlibrary_response
+            mock_statuses.return_value = {}
 
             await client.get("/api/books/search", params={"q": "test"})
 
@@ -99,9 +111,13 @@ class TestSearchEndpoint:
             patch("api.routes.books.get_cached_response", new_callable=AsyncMock) as mock_cache_get,
             patch("api.routes.books.store_cached_response", new_callable=AsyncMock),
             patch("api.routes.books.search_books", new_callable=AsyncMock) as mock_search,
+            patch(
+                "api.routes.books.get_book_statuses_batch", new_callable=AsyncMock
+            ) as mock_statuses,
         ):
             mock_cache_get.return_value = None
             mock_search.return_value = sample_openlibrary_response
+            mock_statuses.return_value = {}
 
             response = await client.get(
                 "/api/books/search", params={"q": "test", "page": 2, "limit": 50}
@@ -144,9 +160,13 @@ class TestSearchEndpoint:
             patch("api.routes.books.get_cached_response", new_callable=AsyncMock) as mock_cache_get,
             patch("api.routes.books.store_cached_response", new_callable=AsyncMock),
             patch("api.routes.books.search_books", new_callable=AsyncMock) as mock_search,
+            patch(
+                "api.routes.books.get_book_statuses_batch", new_callable=AsyncMock
+            ) as mock_statuses,
         ):
             mock_cache_get.return_value = None
             mock_search.return_value = sample_openlibrary_empty_response
+            mock_statuses.return_value = {}
 
             response = await client.get("/api/books/search", params={"q": "nonexistent12345"})
 
@@ -163,9 +183,13 @@ class TestSearchEndpoint:
             patch("api.routes.books.get_cached_response", new_callable=AsyncMock) as mock_cache_get,
             patch("api.routes.books.store_cached_response", new_callable=AsyncMock),
             patch("api.routes.books.search_books", new_callable=AsyncMock) as mock_search,
+            patch(
+                "api.routes.books.get_book_statuses_batch", new_callable=AsyncMock
+            ) as mock_statuses,
         ):
             mock_cache_get.return_value = None
             mock_search.return_value = sample_openlibrary_response
+            mock_statuses.return_value = {}
 
             response = await client.get(
                 "/api/books/search", params={"q": "test", "page": 1, "limit": 100}
@@ -186,9 +210,13 @@ class TestSearchEndpoint:
             patch("api.routes.books.get_cached_response", new_callable=AsyncMock) as mock_cache_get,
             patch("api.routes.books.store_cached_response", new_callable=AsyncMock),
             patch("api.routes.books.search_books", new_callable=AsyncMock) as mock_search,
+            patch(
+                "api.routes.books.get_book_statuses_batch", new_callable=AsyncMock
+            ) as mock_statuses,
         ):
             mock_cache_get.return_value = None
             mock_search.return_value = sample_openlibrary_response
+            mock_statuses.return_value = {}
 
             response = await client.get("/api/books/search", params={"q": "test"})
 
@@ -199,3 +227,4 @@ class TestSearchEndpoint:
             assert "author_name" in book
             assert "cover_url" in book
             assert "first_publish_year" in book
+            assert "status" in book

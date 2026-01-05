@@ -20,6 +20,7 @@ export default {
   testMatch: ['**/tests/web/**/*.test.ts', '**/tests/web/**/*.test.tsx'],
   setupFilesAfterEnv: ['<rootDir>/../tests/web/setup.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  modulePaths: ['<rootDir>/node_modules'],
   rootDir: '.',
   roots: ['<rootDir>', '<rootDir>/../tests/web'],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/main.tsx'],

@@ -133,9 +133,7 @@ async def set_book_status(
         return dict(row)
 
 
-async def delete_book_status(
-    openlibrary_work_key: str, db_path: Optional[Path] = None
-) -> bool:
+async def delete_book_status(openlibrary_work_key: str, db_path: Optional[Path] = None) -> bool:
     """Delete the reading status for a book.
 
     Args:
@@ -167,8 +165,33 @@ async def get_all_book_statuses(
     """
     async with get_db_connection(db_path) as db:
         db.row_factory = aiosqlite.Row
-        cursor = await db.execute(
-            "SELECT * FROM book_status ORDER BY updated_at DESC"
-        )
+        cursor = await db.execute("SELECT * FROM book_status ORDER BY updated_at DESC")
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
+
+
+async def get_book_statuses_batch(
+    openlibrary_work_keys: list[str], db_path: Optional[Path] = None
+) -> dict[str, str]:
+    """Get reading statuses for multiple books in a single query.
+
+    Args:
+        openlibrary_work_keys: List of OpenLibrary work keys
+        db_path: Optional database path for testing
+
+    Returns:
+        Dictionary mapping openlibrary_work_key to status string
+    """
+    if not openlibrary_work_keys:
+        return {}
+
+    async with get_db_connection(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        # Create placeholders for the IN clause
+        placeholders = ",".join("?" * len(openlibrary_work_keys))
+        cursor = await db.execute(
+            f"SELECT openlibrary_work_key, status FROM book_status WHERE openlibrary_work_key IN ({placeholders})",
+            openlibrary_work_keys,
+        )
+        rows = await cursor.fetchall()
+        return {row["openlibrary_work_key"]: row["status"] for row in rows}
