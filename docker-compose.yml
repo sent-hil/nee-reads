@@ -30,6 +30,7 @@ services:
     volumes:
       - ./api:/app/api
       - ./web/src:/app/web/src
+      - ./web/index.html:/app/web/index.html
       - ./data:/app/data
     environment:
       - PYTHONUNBUFFERED=1

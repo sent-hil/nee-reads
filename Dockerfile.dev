@@ -1,0 +1,49 @@
+# Development Dockerfile with hot reload for both API and frontend
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies, Node.js, and uv
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add uv to PATH
+ENV PATH="/root/.local/bin:$PATH"
+
+# Copy Python project files
+COPY pyproject.toml README.md ./
+
+# Copy API code (will be overridden by volume mount)
+COPY api/ ./api/
+
+# Install Python dependencies
+RUN uv sync
+
+# Copy frontend package files and install dependencies
+COPY web/package.json web/package-lock.json* ./web/
+RUN cd web && npm install
+
+# Copy frontend source (will be overridden by volume mount)
+COPY web/ ./web/
+
+# Create data directory
+RUN mkdir -p /app/data
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Expose ports (7002 for API, 7003 for Vite dev server)
+EXPOSE 7002 7003
+
+# Create startup script
+RUN echo '#!/bin/bash\n\
+cd /app/web && npm run dev -- --host 0.0.0.0 --port 7003 &\n\
+cd /app && uv run uvicorn api.main:app --reload --host 0.0.0.0 --port 7002\n\
+' > /app/start-dev.sh && chmod +x /app/start-dev.sh
+
+CMD ["/app/start-dev.sh"]
