@@ -35,6 +35,10 @@ async def list_statuses() -> BookStatusListResponse:
         statuses=[
             BookStatusResponse(
                 openlibrary_work_key=s["openlibrary_work_key"],
+                title=s["title"],
+                author_name=s["author_name"],
+                cover_url=s["cover_url"],
+                first_publish_year=s["first_publish_year"],
                 status=ReadingStatus(s["status"]),
                 created_at=s["created_at"],
                 updated_at=s["updated_at"],
@@ -61,7 +65,7 @@ async def get_status(
         openlibrary_work_key: The OpenLibrary work key (e.g., '/works/OL123W')
 
     Returns:
-        BookStatusResponse with the current status
+        BookStatusResponse with the current status and book metadata
     """
     status = await get_book_status(openlibrary_work_key)
     if not status:
@@ -69,6 +73,10 @@ async def get_status(
 
     return BookStatusResponse(
         openlibrary_work_key=status["openlibrary_work_key"],
+        title=status["title"],
+        author_name=status["author_name"],
+        cover_url=status["cover_url"],
+        first_publish_year=status["first_publish_year"],
         status=ReadingStatus(status["status"]),
         created_at=status["created_at"],
         updated_at=status["updated_at"],
@@ -88,15 +96,26 @@ async def update_status(
 
     Args:
         openlibrary_work_key: The OpenLibrary work key (e.g., '/works/OL123W')
-        request: The status to set
+        request: The status and book metadata to set
 
     Returns:
-        BookStatusResponse with the updated status
+        BookStatusResponse with the updated status and book metadata
     """
-    status = await set_book_status(openlibrary_work_key, request.status.value)
+    status = await set_book_status(
+        openlibrary_work_key=openlibrary_work_key,
+        status=request.status.value,
+        title=request.title,
+        author_name=request.author_name,
+        cover_url=request.cover_url,
+        first_publish_year=request.first_publish_year,
+    )
 
     return BookStatusResponse(
         openlibrary_work_key=status["openlibrary_work_key"],
+        title=status["title"],
+        author_name=status["author_name"],
+        cover_url=status["cover_url"],
+        first_publish_year=status["first_publish_year"],
         status=ReadingStatus(status["status"]),
         created_at=status["created_at"],
         updated_at=status["updated_at"],

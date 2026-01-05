@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse
 from api.database import init_database
 from api.routes.books import router as books_router
 from api.routes.status import router as status_router
+from api.routes.library import router as library_router
 
 
 @asynccontextmanager
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
     # Include API routes
     app.include_router(books_router)
     app.include_router(status_router)
+    app.include_router(library_router)
 
     # Serve static files in production
     static_path = Path(__file__).parent.parent / "web" / "dist"

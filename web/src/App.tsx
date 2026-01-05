@@ -1,9 +1,9 @@
 /**
- * Main App component
+ * Main App component with routing
  */
 
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import type { Book } from './types/book';
+import type { Book, ReadingStatus } from './types/book';
 import { searchBooks, ApiError, setBookStatus, deleteBookStatus } from './services/api';
 import { useDebounce } from './hooks/useDebounce';
 import { SearchBar } from './components/SearchBar';
@@ -14,26 +14,61 @@ import { NoResults } from './components/NoResults';
 import { LoadingState } from './components/LoadingState';
 import { Toast, ToastData } from './components/Toast';
 import { StatusChangeInfo } from './components/BookCard';
+import { Footer, Page } from './components/Footer';
+import { LibraryPage } from './components/LibraryPage';
 
 const DEBOUNCE_DELAY = 500;
 
-/** Get the search query from URL */
-function getQueryFromUrl(): string {
+// Routing helpers
+
+type Route =
+  | { page: 'discover'; query: string }
+  | { page: 'library'; status: ReadingStatus };
+
+/** Map URL slug to ReadingStatus */
+const SLUG_TO_STATUS: Record<string, ReadingStatus> = {
+  'to-read': 'to_read',
+  'did-not-finish': 'did_not_finish',
+  'completed': 'completed',
+};
+
+/** Map ReadingStatus to URL slug */
+const STATUS_TO_SLUG: Record<ReadingStatus, string> = {
+  to_read: 'to-read',
+  did_not_finish: 'did-not-finish',
+  completed: 'completed',
+};
+
+/** Parse the current URL to determine the route */
+function getRouteFromUrl(): Route {
+  const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
-  return params.get('q') || '';
-}
 
-/** Update URL with search query */
-function updateUrl(query: string): void {
-  const url = new URL(window.location.href);
-  if (query) {
-    url.searchParams.set('q', query);
-  } else {
-    url.searchParams.delete('q');
+  // Check for library routes
+  if (path.startsWith('/library/')) {
+    const slug = path.replace('/library/', '');
+    const status = SLUG_TO_STATUS[slug];
+    if (status) {
+      return { page: 'library', status };
+    }
   }
-  window.history.pushState({}, '', url.toString());
+
+  // Default to discover page
+  return { page: 'discover', query: params.get('q') || '' };
 }
 
+/** Navigate to a new route */
+function navigateTo(route: Route): void {
+  let url: string;
+  if (route.page === 'library') {
+    url = `/library/${STATUS_TO_SLUG[route.status]}`;
+  } else {
+    url = route.query ? `/?q=${encodeURIComponent(route.query)}` : '/';
+  }
+  window.history.pushState({}, '', url);
+}
+
+// Discover page state
 interface SearchState {
   books: Book[];
   total: number;
@@ -44,7 +79,7 @@ interface SearchState {
   hasSearched: boolean;
 }
 
-const initialState: SearchState = {
+const initialSearchState: SearchState = {
   books: [],
   total: 0,
   page: 1,
@@ -55,45 +90,49 @@ const initialState: SearchState = {
 };
 
 export function App() {
-  const [query, setQuery] = useState(getQueryFromUrl);
-  const [state, setState] = useState<SearchState>(initialState);
+  const [route, setRoute] = useState<Route>(getRouteFromUrl);
+  const [query, setQuery] = useState(route.page === 'discover' ? route.query : '');
+  const [state, setState] = useState<SearchState>(initialSearchState);
   const [toast, setToast] = useState<ToastData | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isInitialMount = useRef(true);
 
   const debouncedQuery = useDebounce(query.trim(), DEBOUNCE_DELAY);
 
-  // Update URL when debounced query changes (skip initial mount to avoid duplicate push)
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    updateUrl(debouncedQuery);
-  }, [debouncedQuery]);
-
   // Handle browser back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
-      setQuery(getQueryFromUrl());
+      const newRoute = getRouteFromUrl();
+      setRoute(newRoute);
+      if (newRoute.page === 'discover') {
+        setQuery(newRoute.query);
+      }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Update URL when debounced query changes on discover page
+  useEffect(() => {
+    if (route.page !== 'discover') return;
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    navigateTo({ page: 'discover', query: debouncedQuery });
+  }, [debouncedQuery, route.page]);
+
   const performSearch = useCallback(
     async (searchQuery: string, page: number) => {
-      // Cancel any pending request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
 
       if (!searchQuery) {
-        setState(initialState);
+        setState(initialSearchState);
         return;
       }
 
-      // Create new abort controller for this request
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
@@ -114,7 +153,6 @@ export function App() {
           hasSearched: true,
         });
       } catch (err) {
-        // Ignore aborted requests
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
@@ -135,8 +173,10 @@ export function App() {
 
   // Search when debounced query changes
   useEffect(() => {
-    performSearch(debouncedQuery, 1);
-  }, [debouncedQuery, performSearch]);
+    if (route.page === 'discover') {
+      performSearch(debouncedQuery, 1);
+    }
+  }, [debouncedQuery, performSearch, route.page]);
 
   const handleQueryChange = (newQuery: string) => {
     setQuery(newQuery);
@@ -144,18 +184,16 @@ export function App() {
 
   const handleClear = () => {
     setQuery('');
-    setState(initialState);
-    updateUrl('');
+    setState(initialSearchState);
+    navigateTo({ page: 'discover', query: '' });
   };
 
   const handlePageChange = (newPage: number) => {
     performSearch(debouncedQuery, newPage);
-    // Scroll to top when changing pages
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleStatusChange = (info: StatusChangeInfo) => {
-    // Update the book's status in local state to keep UI in sync
     setState((prev) => ({
       ...prev,
       books: prev.books.map((book) =>
@@ -165,7 +203,6 @@ export function App() {
       ),
     }));
 
-    // Show toast notification
     setToast({
       id: `${info.openlibraryWorkKey}-${Date.now()}`,
       bookTitle: info.bookTitle,
@@ -180,19 +217,26 @@ export function App() {
   };
 
   const handleUndo = async (toastData: ToastData) => {
-    // Dismiss toast immediately
     setToast(null);
 
     try {
       if (toastData.previousStatus === null) {
-        // If there was no previous status, delete the status
         await deleteBookStatus(toastData.openlibraryWorkKey);
       } else {
-        // Otherwise, restore the previous status
-        await setBookStatus(toastData.openlibraryWorkKey, toastData.previousStatus);
+        // Find the book to get metadata
+        const book = state.books.find(
+          (b) => b.openlibrary_work_key === toastData.openlibraryWorkKey
+        );
+        if (book) {
+          await setBookStatus(toastData.openlibraryWorkKey, toastData.previousStatus, {
+            title: book.title,
+            author_name: book.author_name,
+            cover_url: book.cover_url,
+            first_publish_year: book.first_publish_year,
+          });
+        }
       }
 
-      // Update local state
       setState((prev) => ({
         ...prev,
         books: prev.books.map((book) =>
@@ -206,7 +250,25 @@ export function App() {
     }
   };
 
-  const renderContent = () => {
+  const handleNavigate = (page: Page) => {
+    if (page === 'library') {
+      const newRoute: Route = { page: 'library', status: 'to_read' };
+      setRoute(newRoute);
+      navigateTo(newRoute);
+    } else {
+      const newRoute: Route = { page: 'discover', query };
+      setRoute(newRoute);
+      navigateTo(newRoute);
+    }
+  };
+
+  const handleLibraryStatusChange = (status: ReadingStatus) => {
+    const newRoute: Route = { page: 'library', status };
+    setRoute(newRoute);
+    navigateTo(newRoute);
+  };
+
+  const renderDiscoverContent = () => {
     if (state.isLoading) {
       return <LoadingState />;
     }
@@ -267,8 +329,8 @@ export function App() {
     );
   };
 
-  return (
-    <div className="min-h-screen flex flex-col">
+  const renderDiscoverPage = () => (
+    <>
       {/* Header */}
       <div className="w-full max-w-7xl mx-auto px-6 pt-8 pb-4">
         <div className="mb-6">
@@ -304,25 +366,30 @@ export function App() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-grow w-full max-w-7xl mx-auto px-6 pb-12">
-        {renderContent()}
+      <main className="flex-grow w-full max-w-7xl mx-auto px-6 pb-28">
+        {renderDiscoverContent()}
       </main>
 
       {/* Toast notification */}
       {toast && (
         <Toast toast={toast} onUndo={handleUndo} onDismiss={handleToastDismiss} />
       )}
+    </>
+  );
 
-      {/* Footer */}
-      <footer className="w-full bg-white border-t border-gray-200 mt-auto py-2">
-        <div className="max-w-md mx-auto flex justify-center items-center h-16">
-          <div className="flex flex-col items-center justify-center text-primary">
-            <span className="material-icons-round text-3xl mb-1">search</span>
-            <span className="text-[10px] font-bold tracking-wide">Discover</span>
-            <span className="absolute -top-[1px] w-8 h-1 bg-primary rounded-b-lg" />
-          </div>
-        </div>
-      </footer>
+  return (
+    <div className="min-h-screen flex flex-col">
+      {route.page === 'discover' ? (
+        renderDiscoverPage()
+      ) : (
+        <LibraryPage
+          initialStatus={route.status}
+          onStatusChange={handleLibraryStatusChange}
+        />
+      )}
+
+      {/* Footer Navigation */}
+      <Footer activePage={route.page} onNavigate={handleNavigate} />
     </div>
   );
 }

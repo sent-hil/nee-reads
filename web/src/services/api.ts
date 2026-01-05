@@ -1,8 +1,16 @@
 /**
- * API client for book search
+ * API client for book search and library
  */
 
-import type { SearchResponse, BookStatus, BookStatusListResponse, ReadingStatus } from '../types/book';
+import type {
+  SearchResponse,
+  BookStatus,
+  BookStatusListResponse,
+  ReadingStatus,
+  LibraryResponse,
+  StatusCounts,
+  BookMetadata,
+} from '../types/book';
 
 const API_BASE_URL = '/api';
 
@@ -69,7 +77,8 @@ export async function getBookStatus(
 
 export async function setBookStatus(
   openlibraryWorkKey: string,
-  status: ReadingStatus
+  status: ReadingStatus,
+  bookMetadata: BookMetadata
 ): Promise<BookStatus> {
   const response = await fetch(
     `${API_BASE_URL}/status/${encodeURIComponent(openlibraryWorkKey)}`,
@@ -78,7 +87,13 @@ export async function setBookStatus(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({
+        status,
+        title: bookMetadata.title,
+        author_name: bookMetadata.author_name,
+        cover_url: bookMetadata.cover_url,
+        first_publish_year: bookMetadata.first_publish_year,
+      }),
     }
   );
 
@@ -114,6 +129,45 @@ export async function deleteBookStatus(
 
 export async function getAllBookStatuses(): Promise<BookStatusListResponse> {
   const response = await fetch(`${API_BASE_URL}/status`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData.detail || `HTTP error ${response.status}`;
+    throw new ApiError(message, response.status);
+  }
+
+  return response.json();
+}
+
+// Library API functions
+
+/** Map status to URL slug */
+const STATUS_TO_SLUG: Record<ReadingStatus, string> = {
+  to_read: 'to-read',
+  did_not_finish: 'did-not-finish',
+  completed: 'completed',
+};
+
+export async function getLibraryBooks(
+  status: ReadingStatus,
+  signal?: AbortSignal
+): Promise<LibraryResponse> {
+  const slug = STATUS_TO_SLUG[status];
+  const response = await fetch(`${API_BASE_URL}/library/${slug}`, { signal });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData.detail || `HTTP error ${response.status}`;
+    throw new ApiError(message, response.status);
+  }
+
+  return response.json();
+}
+
+export async function getStatusCounts(
+  signal?: AbortSignal
+): Promise<StatusCounts> {
+  const response = await fetch(`${API_BASE_URL}/library/counts`, { signal });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));

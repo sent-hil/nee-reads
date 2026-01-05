@@ -3,7 +3,7 @@
  */
 
 import { useState, useRef } from 'preact/hooks';
-import type { Book, ReadingStatus } from '../types/book';
+import type { Book, ReadingStatus, BookMetadata } from '../types/book';
 import { setBookStatus } from '../services/api';
 
 export interface StatusChangeInfo {
@@ -11,6 +11,7 @@ export interface StatusChangeInfo {
   bookTitle: string;
   newStatus: ReadingStatus;
   previousStatus: ReadingStatus | null;
+  bookMetadata: BookMetadata;
 }
 
 interface BookCardProps {
@@ -33,6 +34,13 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
   const authorDisplay =
     book.author_name.length > 0 ? book.author_name.join(', ') : 'Unknown Author';
 
+  const bookMetadata: BookMetadata = {
+    title: book.title,
+    author_name: book.author_name,
+    cover_url: book.cover_url,
+    first_publish_year: book.first_publish_year,
+  };
+
   const handleStatusClick = async (status: ReadingStatus) => {
     if (isUpdating) return;
 
@@ -43,13 +51,14 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
 
     setIsUpdating(true);
     try {
-      await setBookStatus(book.openlibrary_work_key, status);
+      await setBookStatus(book.openlibrary_work_key, status, bookMetadata);
       setLocalStatus(status);
       onStatusChange?.({
         openlibraryWorkKey: book.openlibrary_work_key,
         bookTitle: book.title,
         newStatus: status,
         previousStatus,
+        bookMetadata,
       });
     } catch (error) {
       console.error('Failed to update book status:', error);
