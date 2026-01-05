@@ -303,16 +303,22 @@ body { font-family: 'Inter', sans-serif; }
 			</div>
 		</main>
 		<div class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 w-max max-w-[90%] toast-animate">
-			<div class="flex items-center justify-between gap-4 pl-4 pr-3 py-2.5 bg-gray-900/95 dark:bg-white/95 backdrop-blur-md text-white dark:text-gray-900 rounded-2xl shadow-floating border border-white/10 dark:border-black/5 ring-1 ring-black/10">
+			<div class="flex items-center justify-between gap-4 pl-4 pr-2 py-2.5 bg-gray-900/95 dark:bg-white/95 backdrop-blur-md text-white dark:text-gray-900 rounded-2xl shadow-floating border border-white/10 dark:border-black/5 ring-1 ring-black/10">
 				<div class="flex items-center gap-3">
 					<div class="bg-green-500/20 p-1 rounded-full flex items-center justify-center">
 						<span class="material-icons-round text-green-400 dark:text-green-600 text-sm leading-none">check</span>
 					</div>
 					<p class="text-xs sm:text-sm font-medium">Book added to <span class="font-bold text-white dark:text-black">To Read</span> list</p>
 				</div>
-				<button class="ml-2 flex items-center justify-center p-1 rounded-full hover:bg-white/10 dark:hover:bg-black/5 transition-colors group">
-					<span class="text-gray-400 group-hover:text-white dark:text-gray-400 dark:group-hover:text-gray-600 text-[10px] sm:text-xs font-bold uppercase tracking-wide px-1">Undo</span>
-				</button>
+				<div class="flex items-center gap-1">
+					<button class="ml-2 flex items-center justify-center px-2 py-1 rounded-full hover:bg-white/10 dark:hover:bg-black/5 transition-colors group">
+						<span class="text-gray-400 group-hover:text-white dark:text-gray-400 dark:group-hover:text-gray-600 text-[10px] sm:text-xs font-bold uppercase tracking-wide">Undo</span>
+					</button>
+					<div class="w-px h-3 bg-white/20 dark:bg-black/10 mx-1"></div>
+					<button class="flex items-center justify-center w-6 h-6 rounded-full hover:bg-white/10 dark:hover:bg-black/5 transition-colors group">
+						<span class="material-icons-round text-gray-400 group-hover:text-white dark:text-gray-400 dark:group-hover:text-gray-600 text-sm">close</span>
+					</button>
+				</div>
 			</div>
 		</div>
 		<footer class="w-full bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-800 mt-auto py-2">
@@ -332,5 +338,4 @@ body { font-family: 'Inter', sans-serif; }
 				</button>
 			</div>
 		</footer>
-
 	</body></html>
