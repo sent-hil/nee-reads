@@ -29,14 +29,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 # Add uv to PATH
 ENV PATH="/root/.local/bin:$PATH"
 
-# Copy Python project files
-COPY pyproject.toml ./
-
-# Install Python dependencies using uv
-RUN uv sync --no-dev
+# Copy Python project files and README (required by hatchling)
+COPY pyproject.toml README.md ./
 
 # Copy application code
 COPY api/ ./api/
+
+# Install Python dependencies using uv
+RUN uv sync --no-dev
 
 # Copy built frontend from stage 1
 COPY --from=frontend-builder /app/web/dist ./web/dist
