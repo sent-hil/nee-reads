@@ -55,3 +55,56 @@ cd web && npm test
 ```bash
 uv sync
 ```
+
+### Installing Frontend Dependencies
+```bash
+cd web && npm install
+```
+
+## Building
+
+### Building the Frontend
+```bash
+cd web && npm run build
+```
+
+This creates a production build in `web/dist/`.
+
+### Building with Docker
+```bash
+# Production build
+docker-compose build
+
+# Development build
+docker-compose --profile dev build
+```
+
+## Running the Full Application
+
+### Using Docker Compose (Development)
+For local development with hot reload, use the `dev` profile which uses `Dockerfile.dev`:
+```bash
+docker-compose --profile dev up
+```
+
+This starts:
+- API server on port 7002 (with hot reload)
+- Vite dev server on port 7003 (with hot reload)
+
+### Using Docker Compose (Production)
+```bash
+docker-compose up
+```
+
+This runs the production build on port 7002.
+
+### Manual Development Setup (without Docker)
+1. Start the API:
+   ```bash
+   uv run uvicorn api.main:app --reload --port 7002
+   ```
+
+2. Start the frontend dev server (in a separate terminal):
+   ```bash
+   cd web && npm run dev
+   ```

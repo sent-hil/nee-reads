@@ -60,7 +60,21 @@ cd web && npm test
 
 ## Docker
 
-To run the full application using Docker:
+### Development (with hot reload)
+
+For local development with hot reload, use the `dev` profile:
+
+```bash
+docker-compose --profile dev up --build
+```
+
+This starts:
+- API server at http://localhost:7002 (with hot reload)
+- Vite dev server at http://localhost:7003 (with hot reload)
+
+### Production
+
+To run the production build:
 
 ```bash
 docker-compose up --build

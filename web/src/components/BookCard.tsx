@@ -18,7 +18,7 @@ export function BookCard({ book }: BookCardProps) {
       data-testid="book-card"
       data-book-key={book.key}
     >
-      <div className="aspect-[2/3] w-full bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer relative">
+      <div className="aspect-[2/3] w-full bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer relative z-0">
         {book.cover_url ? (
           <img
             src={book.cover_url}
@@ -48,6 +48,41 @@ export function BookCard({ book }: BookCardProps) {
             <br />
             Unavailable
           </span>
+        </div>
+      </div>
+      {/* Dropdown menu */}
+      <div className="absolute top-2 right-2 z-10">
+        <div className="relative">
+          <button
+            className={`flex items-center justify-center w-8 h-8 rounded-full shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 focus:outline-none peer ${
+              book.cover_url
+                ? 'bg-black/40 hover:bg-black/60 backdrop-blur-md text-white'
+                : 'bg-gray-200/50 hover:bg-gray-200 text-gray-600'
+            }`}
+            aria-label="Book options"
+          >
+            <span className="material-icons-round text-lg">more_vert</span>
+          </button>
+          <div className="hidden peer-focus:block hover:block absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-floating border border-gray-100 py-1.5 text-left z-20 origin-top-right">
+            <button
+              onClick={() => {}}
+              className="block w-full px-4 py-2 text-xs font-medium text-text-main-light hover:bg-gray-50 transition-colors text-left"
+            >
+              To Read
+            </button>
+            <button
+              onClick={() => {}}
+              className="block w-full px-4 py-2 text-xs font-medium text-text-main-light hover:bg-gray-50 transition-colors text-left"
+            >
+              Didn't Finish
+            </button>
+            <button
+              onClick={() => {}}
+              className="block w-full px-4 py-2 text-xs font-medium text-text-main-light hover:bg-gray-50 transition-colors text-left"
+            >
+              Completed
+            </button>
+          </div>
         </div>
       </div>
       <div className="mt-3">
