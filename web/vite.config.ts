@@ -4,10 +4,10 @@ import preact from '@preact/preset-vite';
 export default defineConfig({
   plugins: [preact()],
   server: {
-    port: 7001,
+    port: 7003,
     proxy: {
       '/api': {
-        target: 'http://localhost:7000',
+        target: 'http://localhost:7002',
         changeOrigin: true,
       },
     },
