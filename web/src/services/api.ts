@@ -22,18 +22,19 @@ export interface SearchParams {
   limit?: number;
 }
 
-export async function searchBooks({
-  query,
-  page = 1,
-  limit = 100,
-}: SearchParams): Promise<SearchResponse> {
+export async function searchBooks(
+  { query, page = 1, limit = 100 }: SearchParams,
+  signal?: AbortSignal
+): Promise<SearchResponse> {
   const params = new URLSearchParams({
     q: query,
     page: page.toString(),
     limit: limit.toString(),
   });
 
-  const response = await fetch(`${API_BASE_URL}/books/search?${params}`);
+  const response = await fetch(`${API_BASE_URL}/books/search?${params}`, {
+    signal,
+  });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));

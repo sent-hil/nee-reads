@@ -2,7 +2,7 @@
  * Main App component
  */
 
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
 import type { Book } from './types/book';
 import { searchBooks, ApiError } from './services/api';
 import { useDebounce } from './hooks/useDebounce';
@@ -38,20 +38,33 @@ const initialState: SearchState = {
 export function App() {
   const [query, setQuery] = useState('');
   const [state, setState] = useState<SearchState>(initialState);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const debouncedQuery = useDebounce(query.trim(), DEBOUNCE_DELAY);
 
   const performSearch = useCallback(
     async (searchQuery: string, page: number) => {
+      // Cancel any pending request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
       if (!searchQuery) {
         setState(initialState);
         return;
       }
 
+      // Create new abort controller for this request
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        const response = await searchBooks({ query: searchQuery, page });
+        const response = await searchBooks(
+          { query: searchQuery, page },
+          abortController.signal
+        );
         setState({
           books: response.books,
           total: response.total,
@@ -62,6 +75,10 @@ export function App() {
           hasSearched: true,
         });
       } catch (err) {
+        // Ignore aborted requests
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
         const message =
           err instanceof ApiError
             ? err.message
@@ -178,7 +195,6 @@ export function App() {
             onChange={handleQueryChange}
             onClear={handleClear}
             placeholder="Search by title or author..."
-            disabled={state.isLoading}
           />
         </div>
 
