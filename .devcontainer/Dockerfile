@@ -45,6 +45,14 @@ RUN curl -fsSL https://opencode.ai/install | HOME=/tmp bash \
     && mv /tmp/.opencode/bin/opencode /usr/local/bin/opencode \
     && chmod 755 /usr/local/bin/opencode
 
+# Install Neovim (latest stable, architecture-aware)
+RUN ARCH=$(uname -m) \
+    && if [ "$ARCH" = "aarch64" ]; then NVIM_ARCH="arm64"; else NVIM_ARCH="x86_64"; fi \
+    && curl -LO "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${NVIM_ARCH}.tar.gz" \
+    && tar -C /opt -xzf "nvim-linux-${NVIM_ARCH}.tar.gz" \
+    && rm "nvim-linux-${NVIM_ARCH}.tar.gz" \
+    && ln -s /opt/nvim-linux-${NVIM_ARCH}/bin/nvim /usr/local/bin/nvim
+
 # Set the default user
 USER $USERNAME
 WORKDIR /home/$USERNAME
