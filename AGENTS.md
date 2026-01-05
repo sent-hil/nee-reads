@@ -31,3 +31,27 @@ agent-sandbox merge <sandbox-name>
 ```
 
 This fetches your commits and merges them into the host's current branch.
+
+## Development Commands
+
+This project uses `uv` for Python dependency management.
+
+### Running the API
+```bash
+uv run uvicorn api.main:app --reload --port 7000
+```
+
+### Running Python Tests
+```bash
+uv run pytest
+```
+
+### Running Frontend Tests
+```bash
+cd web && npm test
+```
+
+### Installing Dependencies
+```bash
+uv sync
+```
