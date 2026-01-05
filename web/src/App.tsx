@@ -17,6 +17,23 @@ import { StatusChangeInfo } from './components/BookCard';
 
 const DEBOUNCE_DELAY = 500;
 
+/** Get the search query from URL */
+function getQueryFromUrl(): string {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('q') || '';
+}
+
+/** Update URL with search query */
+function updateUrl(query: string): void {
+  const url = new URL(window.location.href);
+  if (query) {
+    url.searchParams.set('q', query);
+  } else {
+    url.searchParams.delete('q');
+  }
+  window.history.pushState({}, '', url.toString());
+}
+
 interface SearchState {
   books: Book[];
   total: number;
@@ -38,12 +55,31 @@ const initialState: SearchState = {
 };
 
 export function App() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(getQueryFromUrl);
   const [state, setState] = useState<SearchState>(initialState);
   const [toast, setToast] = useState<ToastData | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isInitialMount = useRef(true);
 
   const debouncedQuery = useDebounce(query.trim(), DEBOUNCE_DELAY);
+
+  // Update URL when debounced query changes (skip initial mount to avoid duplicate push)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    updateUrl(debouncedQuery);
+  }, [debouncedQuery]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      setQuery(getQueryFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const performSearch = useCallback(
     async (searchQuery: string, page: number) => {
@@ -109,6 +145,7 @@ export function App() {
   const handleClear = () => {
     setQuery('');
     setState(initialState);
+    updateUrl('');
   };
 
   const handlePageChange = (newPage: number) => {
