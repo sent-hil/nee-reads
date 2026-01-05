@@ -49,11 +49,11 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Expose port
-EXPOSE 7000
+EXPOSE 7002
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7000/api/books/search?q=test')" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7002/api/books/search?q=test')" || exit 1
 
 # Run the application using uv
-CMD ["uv", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "7000"]
+CMD ["uv", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "7002"]

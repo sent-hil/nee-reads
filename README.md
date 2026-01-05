@@ -31,10 +31,10 @@ cd web && npm install
 ### Running the API
 
 ```bash
-uv run uvicorn api.main:app --reload --port 7000
+uv run uvicorn api.main:app --reload --port 7002
 ```
 
-The API will be available at http://localhost:7000
+The API will be available at http://localhost:7002
 
 ### Running the Frontend (Development)
 
@@ -66,4 +66,4 @@ To run the full application using Docker:
 docker-compose up --build
 ```
 
-The application will be available at http://localhost:7000
+The application will be available at http://localhost:7002

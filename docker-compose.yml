@@ -6,14 +6,14 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "7000:7000"
+      - "7002:7002"
     volumes:
       - ./data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7000/api/books/search?q=test')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7002/api/books/search?q=test')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -25,8 +25,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "7000:7000"
-      - "7001:7001"
+      - "7002:7002"
+      - "7003:7003"
     volumes:
       - ./api:/app/api
       - ./web/src:/app/web/src

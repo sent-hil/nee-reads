@@ -38,7 +38,7 @@ This project uses `uv` for Python dependency management.
 
 ### Running the API
 ```bash
-uv run uvicorn api.main:app --reload --port 7000
+uv run uvicorn api.main:app --reload --port 7002
 ```
 
 ### Running Python Tests
