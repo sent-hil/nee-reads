@@ -79,6 +79,10 @@ async def get_status(
     Returns:
         BookStatusResponse with the current status and book metadata
     """
+    # Normalize key to always have leading slash (path converter strips it)
+    if not openlibrary_work_key.startswith("/"):
+        openlibrary_work_key = f"/{openlibrary_work_key}"
+
     try:
         status = await get_book_status(openlibrary_work_key)
         if not status:
@@ -122,6 +126,10 @@ async def update_status(
     Returns:
         BookStatusResponse with the updated status and book metadata
     """
+    # Normalize key to always have leading slash (path converter strips it)
+    if not openlibrary_work_key.startswith("/"):
+        openlibrary_work_key = f"/{openlibrary_work_key}"
+
     try:
         status = await set_book_status(
             openlibrary_work_key=openlibrary_work_key,
@@ -164,6 +172,10 @@ async def remove_status(
     Args:
         openlibrary_work_key: The OpenLibrary work key (e.g., '/works/OL123W')
     """
+    # Normalize key to always have leading slash (path converter strips it)
+    if not openlibrary_work_key.startswith("/"):
+        openlibrary_work_key = f"/{openlibrary_work_key}"
+
     try:
         deleted = await delete_book_status(openlibrary_work_key)
         if not deleted:

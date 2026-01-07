@@ -1,5 +1,6 @@
 """Book search route handlers."""
 
+import logging
 from fastapi import APIRouter, HTTPException, Query
 
 from api.models.schemas import SearchResponse, ErrorResponse, ReadingStatus
@@ -9,7 +10,9 @@ from api.services.openlibrary import (
     parse_search_response,
     OpenLibraryError,
 )
-from api.database import get_book_statuses_batch
+from api.database import get_book_statuses_batch, DatabaseError
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/books", tags=["books"])
 
@@ -30,7 +33,12 @@ async def enrich_books_with_status(response: SearchResponse) -> SearchResponse:
     book_keys = [book.openlibrary_work_key for book in response.books]
 
     # Fetch statuses in a single batch query
-    statuses = await get_book_statuses_batch(book_keys)
+    # If database fails, log error but don't break search - just return books without status
+    try:
+        statuses = await get_book_statuses_batch(book_keys)
+    except DatabaseError as e:
+        logger.error(f"Failed to fetch book statuses: {e}")
+        return response
 
     # Update books with their status
     for book in response.books:
