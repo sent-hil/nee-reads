@@ -58,9 +58,9 @@ export async function searchBooks(
 export async function getBookStatus(
   openlibraryWorkKey: string
 ): Promise<BookStatus | null> {
-  const response = await fetch(
-    `${API_BASE_URL}/status/${encodeURIComponent(openlibraryWorkKey)}`
-  );
+  // Don't encode - the key contains slashes (e.g., /works/OL123W) and the backend
+  // route uses {openlibrary_work_key:path} to handle this
+  const response = await fetch(`${API_BASE_URL}/status${openlibraryWorkKey}`);
 
   if (response.status === 404) {
     return null;
@@ -80,9 +80,9 @@ export async function setBookStatus(
   status: ReadingStatus,
   bookMetadata: BookMetadata
 ): Promise<BookStatus> {
-  const response = await fetch(
-    `${API_BASE_URL}/status/${encodeURIComponent(openlibraryWorkKey)}`,
-    {
+  // Don't encode - the key contains slashes (e.g., /works/OL123W) and the backend
+  // route uses {openlibrary_work_key:path} to handle this
+  const response = await fetch(`${API_BASE_URL}/status${openlibraryWorkKey}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -109,12 +109,11 @@ export async function setBookStatus(
 export async function deleteBookStatus(
   openlibraryWorkKey: string
 ): Promise<void> {
-  const response = await fetch(
-    `${API_BASE_URL}/status/${encodeURIComponent(openlibraryWorkKey)}`,
-    {
-      method: 'DELETE',
-    }
-  );
+  // Don't encode - the key contains slashes (e.g., /works/OL123W) and the backend
+  // route uses {openlibrary_work_key:path} to handle this
+  const response = await fetch(`${API_BASE_URL}/status${openlibraryWorkKey}`, {
+    method: 'DELETE',
+  });
 
   if (response.status === 404) {
     return; // Already deleted, treat as success
