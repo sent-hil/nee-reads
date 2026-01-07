@@ -89,18 +89,24 @@ export function LibraryPage({ initialStatus, onStatusChange }: LibraryPageProps)
   };
 
   const handleStatusChange = (info: StatusChangeInfo) => {
-    // If the new status is different from the current tab, remove the book from view
+    // If the new status is different from the current tab (or removed), remove the book from view
     if (info.newStatus !== activeTab) {
       setBooks((prev) =>
         prev.filter((book) => book.openlibrary_work_key !== info.openlibraryWorkKey)
       );
 
       // Update counts
-      setCounts((prev) => ({
-        ...prev,
-        [activeTab]: Math.max(0, prev[activeTab] - 1),
-        [info.newStatus]: prev[info.newStatus] + 1,
-      }));
+      setCounts((prev) => {
+        const updated = {
+          ...prev,
+          [activeTab]: Math.max(0, prev[activeTab] - 1),
+        };
+        // Only increment new status count if not a removal (null)
+        if (info.newStatus !== null) {
+          updated[info.newStatus] = prev[info.newStatus] + 1;
+        }
+        return updated;
+      });
     }
 
     // Show toast notification

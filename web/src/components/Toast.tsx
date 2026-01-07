@@ -14,7 +14,7 @@ const STATUS_LABELS: Record<ReadingStatus, string> = {
 export interface ToastData {
   id: string;
   bookTitle: string;
-  status: ReadingStatus;
+  status: ReadingStatus | null;
   openlibraryWorkKey: string;
   previousStatus: ReadingStatus | null;
 }
@@ -44,22 +44,20 @@ export function Toast({ toast, onUndo, onDismiss }: ToastProps) {
     onDismiss(toast.id);
   };
 
+  const message = toast.status
+    ? `Book added to ${STATUS_LABELS[toast.status]} list`
+    : 'Book removed from library';
+
   return (
     <div className="fixed bottom-24 left-1/2 z-50 w-max max-w-[90%] toast-animate">
       <div className="flex items-center justify-between gap-4 pl-4 pr-2 py-2.5 bg-gray-900/95 backdrop-blur-md text-white rounded-2xl shadow-floating border border-white/10 ring-1 ring-black/10">
         <div className="flex items-center gap-3">
-          <div className="bg-green-500/20 p-1 rounded-full flex items-center justify-center">
-            <span className="material-icons-round text-green-400 text-sm leading-none">
-              check
+          <div className={`${toast.status ? 'bg-green-500/20' : 'bg-gray-500/20'} p-1 rounded-full flex items-center justify-center`}>
+            <span className={`material-icons-round ${toast.status ? 'text-green-400' : 'text-gray-400'} text-sm leading-none`}>
+              {toast.status ? 'check' : 'remove_circle_outline'}
             </span>
           </div>
-          <p className="text-xs sm:text-sm font-medium">
-            Book added to{' '}
-            <span className="font-bold text-white">
-              {STATUS_LABELS[toast.status]}
-            </span>{' '}
-            list
-          </p>
+          <p className="text-xs sm:text-sm font-medium">{message}</p>
         </div>
         <div className="flex items-center gap-1">
           <button

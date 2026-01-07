@@ -4,12 +4,12 @@
 
 import { useState, useRef, useEffect } from 'preact/hooks';
 import type { Book, ReadingStatus, BookMetadata } from '../types/book';
-import { setBookStatus } from '../services/api';
+import { setBookStatus, deleteBookStatus } from '../services/api';
 
 export interface StatusChangeInfo {
   openlibraryWorkKey: string;
   bookTitle: string;
-  newStatus: ReadingStatus;
+  newStatus: ReadingStatus | null;
   previousStatus: ReadingStatus | null;
   bookMetadata: BookMetadata;
 }
@@ -50,18 +50,26 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
     if (isUpdating) return;
 
     const previousStatus = localStatus;
+    const isToggleOff = localStatus === status;
 
     // Close dropdown immediately by blurring the button
     menuButtonRef.current?.blur();
 
     setIsUpdating(true);
     try {
-      await setBookStatus(book.openlibrary_work_key, status, bookMetadata);
-      setLocalStatus(status);
+      if (isToggleOff) {
+        // Toggle off - delete the status
+        await deleteBookStatus(book.openlibrary_work_key);
+        setLocalStatus(null);
+      } else {
+        // Set new status
+        await setBookStatus(book.openlibrary_work_key, status, bookMetadata);
+        setLocalStatus(status);
+      }
       onStatusChange?.({
         openlibraryWorkKey: book.openlibrary_work_key,
         bookTitle: book.title,
-        newStatus: status,
+        newStatus: isToggleOff ? null : status,
         previousStatus,
         bookMetadata,
       });
