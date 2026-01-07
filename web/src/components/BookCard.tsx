@@ -2,7 +2,7 @@
  * BookCard component displaying a single book with cover, title, and author
  */
 
-import { useState, useRef } from 'preact/hooks';
+import { useState, useRef, useEffect } from 'preact/hooks';
 import type { Book, ReadingStatus, BookMetadata } from '../types/book';
 import { setBookStatus } from '../services/api';
 
@@ -30,6 +30,11 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
   // Initialize from book.status (from API) - this reflects database state
   const [localStatus, setLocalStatus] = useState<ReadingStatus | null>(book.status);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Sync localStatus when book.status prop changes (e.g., after refresh/refetch)
+  useEffect(() => {
+    setLocalStatus(book.status);
+  }, [book.status]);
 
   const authorDisplay =
     book.author_name.length > 0 ? book.author_name.join(', ') : 'Unknown Author';
