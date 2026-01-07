@@ -5,7 +5,13 @@ You are running inside an isolated sandbox container. This environment has its o
 ## Git Workflow
 
 ### Committing Changes
-Commit your changes as usual:
+
+**IMPORTANT:** Before committing, always run:
+1. Python tests: `uv run pytest`
+2. Frontend build: `cd web && npm run build`
+
+Only commit if both pass successfully.
+
 ```bash
 git add .
 git commit -m "your commit message"
