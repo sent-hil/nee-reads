@@ -373,9 +373,9 @@ class TestBookStatus:
 
     async def test_status_enum_constraint(self, initialized_db: Path) -> None:
         """Test that invalid status values are rejected by the database."""
-        import aiosqlite
+        from api.database import DatabaseError
 
-        with pytest.raises(aiosqlite.IntegrityError):
+        with pytest.raises(DatabaseError):
             await set_book_status(
                 openlibrary_work_key="/works/OL123W",
                 status="invalid_status",

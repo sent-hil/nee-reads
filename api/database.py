@@ -1,6 +1,7 @@
 """Database module for SQLite connection and table management."""
 
 import json
+import logging
 import aiosqlite
 from pathlib import Path
 from typing import Optional, Any
@@ -8,23 +9,70 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
+
 # Default database path - can be overridden for testing
 DATABASE_PATH = Path("data/database.db")
+
+
+class DatabaseError(Exception):
+    """Raised when database operations fail."""
+
+    pass
+
+
+def ensure_database_directory(db_path: Path) -> None:
+    """Ensure the database directory exists and is writable.
+
+    Args:
+        db_path: Path to the database file
+
+    Raises:
+        DatabaseError: If directory cannot be created or is not writable
+    """
+    directory = db_path.parent
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        # Test write permission by creating a temp file
+        test_file = directory / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+    except PermissionError as e:
+        raise DatabaseError(
+            f"Cannot write to database directory '{directory}': Permission denied"
+        ) from e
+    except OSError as e:
+        raise DatabaseError(f"Cannot create database directory '{directory}': {e}") from e
 
 
 @asynccontextmanager
 async def get_db_connection(
     db_path: Optional[Path] = None,
 ) -> AsyncGenerator[aiosqlite.Connection, None]:
-    """Get a database connection as a context manager."""
+    """Get a database connection as a context manager.
+
+    Raises:
+        DatabaseError: If database connection fails
+    """
     path = db_path or DATABASE_PATH
-    db = await aiosqlite.connect(str(path))
-    # Enable foreign key support
-    await db.execute("PRAGMA foreign_keys = ON")
     try:
-        yield db
-    finally:
-        await db.close()
+        # Ensure directory exists before connecting
+        ensure_database_directory(path)
+        db = await aiosqlite.connect(str(path))
+        # Enable foreign key support
+        await db.execute("PRAGMA foreign_keys = ON")
+        try:
+            yield db
+        finally:
+            await db.close()
+    except DatabaseError:
+        raise
+    except aiosqlite.Error as e:
+        logger.error(f"Database connection error: {e}")
+        raise DatabaseError(f"Failed to connect to database: {e}") from e
+    except Exception as e:
+        logger.error(f"Unexpected database error: {e}")
+        raise DatabaseError(f"Unexpected database error: {e}") from e
 
 
 async def init_database(db_path: Optional[Path] = None) -> None:
