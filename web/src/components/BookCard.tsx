@@ -29,12 +29,42 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   // Initialize from book.status (from API) - this reflects database state
   const [localStatus, setLocalStatus] = useState<ReadingStatus | null>(book.status);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Sync localStatus when book.status prop changes (e.g., after refresh/refetch)
   useEffect(() => {
     setLocalStatus(book.status);
   }, [book.status]);
+
+  // Close dropdown when clicking outside the card
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Handle card click to open dropdown on mobile
+  const handleCardClick = (event: MouseEvent) => {
+    // Don't trigger if clicking on the dropdown menu or button
+    const target = event.target as HTMLElement;
+    if (target.closest('[data-dropdown-area]')) {
+      return;
+    }
+    // On mobile (screen width < 640px), clicking the card opens the dropdown directly
+    // This matches Tailwind's sm: breakpoint
+    if (window.innerWidth < 640) {
+      setIsDropdownOpen(true);
+    }
+  };
 
   const authorDisplay =
     book.author_name.length > 0 ? book.author_name.join(', ') : 'Unknown Author';
@@ -52,8 +82,8 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
     const previousStatus = localStatus;
     const isToggleOff = localStatus === status;
 
-    // Close dropdown immediately by blurring the button
-    menuButtonRef.current?.blur();
+    // Close dropdown immediately
+    setIsDropdownOpen(false);
 
     setIsUpdating(true);
     try {
@@ -84,9 +114,11 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
 
   return (
     <div
+      ref={cardRef}
       className="group relative flex flex-col"
       data-testid="book-card"
       data-book-key={book.openlibrary_work_key}
+      onClick={handleCardClick}
     >
       <div className="aspect-[2/3] w-full bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 book-card-hover cursor-pointer relative z-0">
         {/* Status badge - top left */}
@@ -132,23 +164,30 @@ export function BookCard({ book, onStatusChange }: BookCardProps) {
       </div>
 
       {/* Dropdown menu - top right */}
-      <div className="absolute top-2 right-2 z-10">
+      <div className="absolute top-2 right-2 z-10" data-dropdown-area>
         <div className="relative">
           <button
             ref={menuButtonRef}
-            className={`flex items-center justify-center w-8 h-8 rounded-full shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 focus:outline-none peer ${
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDropdownOpen(!isDropdownOpen);
+            }}
+            className={`flex items-center justify-center w-8 h-8 rounded-full shadow-sm transition-all duration-200 focus:outline-none ${
+              isDropdownOpen ? 'opacity-100' : 'opacity-0'
+            } sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 ${
               book.cover_url
                 ? 'bg-black/40 hover:bg-black/60 backdrop-blur-md text-white'
                 : 'bg-gray-200/50 hover:bg-gray-200 text-gray-600'
             } ${isUpdating ? 'cursor-wait' : ''}`}
             aria-label="Book options"
+            aria-expanded={isDropdownOpen}
             disabled={isUpdating}
           >
             <span className="material-icons-round text-lg">
               {isUpdating ? 'hourglass_empty' : 'more_vert'}
             </span>
           </button>
-          <div className="hidden peer-focus:block hover:block absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-floating border border-gray-100 p-1 text-left z-20 origin-top-right">
+          <div className={`${isDropdownOpen ? 'block' : 'hidden'} absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-floating border border-gray-100 p-1 text-left z-20 origin-top-right`}>
             <button
               onClick={() => handleStatusClick('to_read')}
               className={`flex items-center justify-between w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
